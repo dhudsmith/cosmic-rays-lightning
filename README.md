@@ -2,7 +2,7 @@
 Intellegently extract significant cosmic ray events and correlate them with observed lightning activity.
 
 ## SQL Database:
-The SQL Database containing the cosmic ray data can be found here:
+The SQL Database containing the cosmic ray data can be found here (requires Box.com login):
 https://osu.box.com/cosmic-rays-lightning
 
 ### Metadata for SQL database:
