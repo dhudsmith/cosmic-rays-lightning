@@ -9,6 +9,7 @@ import glob
 import StringIO
 import sqlite3 as lite
 import collections
+from datetime import datetime
 
 #####################################################################################
 # Program description:
@@ -216,10 +217,8 @@ def coercemonth(namedmonthtuple):
 
 def cleanup(datatuples):
     """Cleanup a list of data tuples.
-     1) Throw out "None" entries
-     2) Throw out missing values. Throwing out missing
-    values automatically removes imaginary days since they are represented as missing
-    values.
+    * Remove None records
+    * Remove invalid dates
 
     Arguments:
     datatuples -- list of datumtuple to be cleaned
@@ -227,21 +226,23 @@ def cleanup(datatuples):
     Return:
     cleaned list of datumtuple
     """
-    if datatuples is not None:
-        listmissing = []
-        for i in range(0, len(datatuples)):
-            if datatuples[i] is None:
+
+    listmissing = []
+    for i in range(0, len(datatuples)):
+        if datatuples[i] is None:
+            listmissing.append(i)
+        else :
+            try:
+                datetime.datetime(datetime.strptime(datatuples.date, format='%Y%m%d'))
+            except ValueError:
                 listmissing.append(i)
-            elif datatuples[i].realcount < 0:
-                listmissing.append(i)
 
-        for i in sorted(listmissing, reverse=True):
-            del datatuples[i]
+    for i in sorted(listmissing, reverse=True):
+        del datatuples[i]
 
-        return datatuples
+    return datatuples
 
-    else:
-        return None
+
 
 
 #####################################################################################

@@ -6,9 +6,10 @@
 #####################################################################################
 
 import sqlite3 as lite
-import datetime
+from datetime import datetime
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from pandas import Series, DataFrame, Panel
 
 
@@ -34,7 +35,7 @@ from pandas import Series, DataFrame, Panel
 #####################################################################################
 
 def querySQL(con, station, datemin=0, datemax=99999999):
-    """Performs the SQL query
+    """Performs the SQL query to find all records from "station" with dates in [datemin,  datemax)
      "SELECT Date, Hour, Count FROM Data WHERE Station = 'station' AND Date BETWEEN 'datemin' AND 'datemax' ORDER BY Date, Hour"
 
     Arguments:
@@ -53,31 +54,39 @@ def querySQL(con, station, datemin=0, datemax=99999999):
 
         # Get some data
         cur.execute("SELECT Date, Hour, Count FROM Data WHERE Station = ? AND Date BETWEEN ? AND ? ORDER BY Date, Hour",
-                    (station, datemin, datemax))
+                    (station, datemin-1, datemax))
 
-        data = cur.fetchall()
+        data = np.array(cur.fetchall())
 
     # date and time to pandas.datetime
     data2 = []
     for x in data:
-        time = datetime.datetime.strptime(str(x[0]) + str(x[1]).zfill(2) + "0000", '%Y%m%d%H%M%S')
-        print time
-        # time = str(x[0]) + str(x[1]).zfill(2)
+        timestring = str(x[0]) + str(x[1]-1).zfill(2) + "0000"
+        time = pd.to_datetime(datetime.strptime(timestring, '%Y%m%d%H%M%S'))
+
         data2.append((time, x[2]))
 
-    return data2
+    return np.array(data2)
 
 
 #####################################################################################
 # Program execution
 #####################################################################################
-
+#
 # get some cosmic ray data of sql database:
 # Initialize the connection
 con = lite.connect('CRData.db')
 
-data = querySQL(con, "MEXICO", 19990101, 19990105)
-print type(data)
+startdate = 19990101
+enddate = 19990201
+data = querySQL(con, "MEXICO", startdate, enddate)
 
-for tup in data:
-    print type(tup[0]), " ", type(tup[1]), " ", tup
+# Get the date range
+startdatepd = pd.to_datetime(datetime.strptime(str(startdate), '%Y%m%d'))
+enddatepd = pd.to_datetime(datetime.strptime(str(enddate), '%Y%m%d'))
+dates = pd.date_range(startdatepd, enddatepd, freq='H')
+
+# Build the time series
+ts = Series(data[:,1], index = data[:,0])
+ts.plot()
+plt.show()
