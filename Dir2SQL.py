@@ -27,6 +27,8 @@ from datetime import datetime
 # This code is designed to parse the LONGFORMAT data and will fail on files that
 # do not meet the precise formatting characteristics of these files which is outlined below.
 
+# Mirroring
+
 # Description of files on the ftp server:
 # Each file corresponds to one station within some time window, containing an integer number of months
 # The months are stored in blocks of 4096 bytes with no padding
@@ -68,6 +70,7 @@ from datetime import datetime
 
 # Length in bytes of one month
 monthlength = 4096
+
 
 #####################################################################################
 # Named tuples:
@@ -227,17 +230,22 @@ def cleanup(datatuples):
     cleaned list of datumtuple
     """
 
-    listmissing = []
+    missing = []
     for i in range(0, len(datatuples)):
         if datatuples[i] is None:
-            listmissing.append(i)
+            missing.append(i)
         else :
             try:
-                datetime.datetime(datetime.strptime(datatuples.date, format='%Y%m%d'))
+                year = int(str(datatuples[i].date)[:4])
+                month = int(str(datatuples[i].date)[4::5])
+                day = int(str(datatuples[i].date)[6::7])
+                # print year, " " , month, " ", day
+                datetime(year, month, day)
             except ValueError:
-                listmissing.append(i)
+                missing.append(i)
+                print "Invalid date: ", year, "-", month, "-", day
 
-    for i in sorted(listmissing, reverse=True):
+    for i in sorted(missing, reverse=True):
         del datatuples[i]
 
     return datatuples
@@ -253,7 +261,7 @@ def cleanup(datatuples):
 # File Access and data coercion
 # ----------------------------------------
 
-path = "ftpmirror/*/LONGFORMAT/*.txt"
+path = "test/*/LONGFORMAT/*.txt"
 
 data = []
 for file in glob.iglob(path):
@@ -267,16 +275,16 @@ for file in glob.iglob(path):
 # SQL insertion
 # ----------------------------------------
 
-# Initialize the connection
-con = lite.connect('CRData.db')
-
-with con:
-    cur = con.cursor()
-
-    # create the table if it doesn't exist
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS Data(Id INTEGER PRIMARY KEY, Station TEXT, Date INT, Hour INT, Lat REAL, Lon REAL, Alt REAL, Warn TEXT, Count INT)")
-
-    # insert all the tuples into the database
-    cur.executemany("INSERT INTO Data(Station,Date,Hour,Lat,Lon,Alt,Warn,Count) VALUES(?,?,?,?,?,?,?,?)",
-                    data)
+# # Initialize the connection
+# con = lite.connect('CRData.db')
+#
+# with con:
+#     cur = con.cursor()
+#
+#     # create the table if it doesn't exist
+#     cur.execute(
+#         "CREATE TABLE IF NOT EXISTS Data(Id INTEGER PRIMARY KEY, Station TEXT, Date INT, Hour INT, Lat REAL, Lon REAL, Alt REAL, Warn TEXT, Count INT)")
+#
+#     # insert all the tuples into the database
+#     cur.executemany("INSERT INTO Data(Station,Date,Hour,Lat,Lon,Alt,Warn,Count) VALUES(?,?,?,?,?,?,?,?)",
+#                     data)
