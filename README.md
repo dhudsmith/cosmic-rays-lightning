@@ -26,20 +26,16 @@ https://osu.box.com/cosmic-rays-lightning
 ## Mirroring the WDCCR directory
 The unix program 'lftp' can be used to mirror the ftp directory structure on the WDDCR website. I used the following
 steps to mirror the ftp directory:
-1. Open a terminal
-2. Enter lftp and connect to the ftp server:
-```
- lftp ftp.stelab.nagoya-u.ac.jp/
-```
- 3. Use `mirror` to copy the directory structure
-The given options are
-    - The `-c` performs the mirror in continue mode in case of network interrupt
-    - The `--parallel=<positive int>` the files to be downloaded in parallel (<positive int>-fold)
-    - The `--exclude` and `--exclude-glob` commands exclude unwanted files. We are only interested in the LONGFORMAT files
- ```
- lftp:~> mirror -c --parallel=<positive int> --exclude SHORTFORMAT/ --exclude CARDFORMAT --exclude OLD/ --exclude ORIGINAL/ --exclude-glob *_all.txt --exclude-glob *.pdf  pub/WDCCR/STATIONS/ <target directory>
- ```
-4. Type `exit` to exit lftp
+
+1.  Open a terminal
+2.  Enter lftp and connect to the ftp server: ` lftp ftp.stelab.nagoya-u.ac.jp/`
+3.  Use `mirror` to copy the directory structure: ` lftp:~> mirror -c --parallel=<positive int> --exclude SHORTFORMAT/ --exclude CARDFORMAT --exclude OLD/ --exclude ORIGINAL/ --exclude-glob *_all.txt --exclude-glob *.pdf  pub/WDCCR/STATIONS/ <target directory>`
+4.  Type `exit` to exit lftp
+
+In step 3. the options are
+- The `-c` performs the mirror in continue mode in case of network interruption
+- The `--parallel=<positive int>` the files to be downloaded in parallel (<positive int>-fold)
+- The `--exclude` and `--exclude-glob` commands exclude unwanted files. We are only interested in the LONGFORMAT files.
 
 These steps are based on an lftp tutorials found here:
 - http://www.cyberciti.biz/faq/lftp-mirror-example/
